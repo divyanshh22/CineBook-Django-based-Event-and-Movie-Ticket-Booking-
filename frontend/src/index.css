@@ -1684,6 +1684,25 @@ input, select, textarea {
   color: var(--text);
 }
 
+.form-field input[type='file'] {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+.poster-upload-preview {
+  width: 120px;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
 .chip-picker { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 
 .chip {

@@ -7,7 +7,6 @@ Idempotent: safe to run more than once. Also creates a demo user
 (username: demo / password: demo12345) and a staff user (admin / admin12345)
 unless they already exist.
 """
-import random
 from datetime import date, time, timedelta
 from decimal import Decimal
 from io import BytesIO
@@ -22,78 +21,64 @@ from accounts.models import User
 from catalog.models import Actor, Event, EventCategory, Genre, Movie, Review
 from cinemas.models import Cinema, Screen, Seat, Showtime
 
-GENRES = ["Action", "Drama", "Comedy", "Thriller", "Sci-Fi", "Romance", "Animation", "Horror"]
+GENRES = ["Action", "Drama", "Comedy", "Thriller", "Sci-Fi", "Romance", "Animation", "Horror", "Biography", "Crime"]
 
 MOVIES = [
     {
-        "title": "Neon Horizon",
-        "desc": "A rogue engineer discovers a city-sized simulation hiding the truth about humanity. A visual feast that never lets go.",
-        "duration": 148, "language": "English", "certification": "U/A",
-        "director": "Arjun Mehta", "status": "now_showing", "trending": True,
-        "release_offset": 5, "actors": ["Aditya Rao", "Meera Kapoor", "Daniel Cruz"],
+        "title": "Punjab '95",
+        "desc": "Based on the life of prominent human rights activist Jaswant Singh Khalra.",
+        "duration": 169, "language": "Punjabi", "certification": "U/A",
+        "director": "Honey Trehan", "status": "now_showing", "trending": True,
+        "release_offset": 4, "actors": ["Diljit Dosanjh", "Saurabh Sachdeva", "Veer Abhinav"],
+        "genres": ["Drama", "Biography", "Thriller"],
     },
     {
-        "title": "Midnight Trains",
-        "desc": "Three strangers share a sleeper berth and a secret that could topple a corporation by sunrise.",
-        "duration": 121, "language": "Hindi", "certification": "U/A",
-        "director": "Sara Fernandes", "status": "now_showing", "trending": True,
-        "release_offset": 12, "actors": ["Rohan Desai", "Zoya Sheikh"],
+        "title": "Dhurandhar: The Revenge",
+        "desc": "Jaskirat Singh Rangi descends deeper into his alias as Hamza Ali Mazari, rising through Karachi's criminal hierarchy to claim the feared title 'Sher-e-Baloch' while balancing loyalty, betrayal, and survival in a ruthless underworld.",
+        "duration": 235, "language": "Hindi", "certification": "A",
+        "director": "Aditya Dhar", "status": "now_showing", "trending": True,
+        "release_offset": 20, "actors": ["Ranveer Singh", "Akshaye Khanna", "Sanjay Dutt"],
+        "genres": ["Action", "Crime", "Drama"],
     },
     {
-        "title": "Paper Planes",
-        "desc": "A warm, funny story about a retired teacher and the street kids who teach him to fly again.",
-        "duration": 112, "language": "Hindi", "certification": "U",
-        "director": "Vikram Nair", "status": "now_showing", "trending": False,
-        "release_offset": 20, "actors": ["Ishaan Kulkarni"],
+        "title": "Dhamaal 4",
+        "desc": "A century-old hidden treasure drives greedy individuals to risk everything, landing them in dangerous situations that test their resolve and relationships.",
+        "duration": 143, "language": "Hindi", "certification": "U/A",
+        "director": "Indra Kumar", "status": "now_showing", "trending": True,
+        "release_offset": 30, "actors": ["Ajay Devgn", "Ravi Kishan", "Sanjeeda Sheikh"],
+        "genres": ["Comedy", "Action"],
     },
     {
-        "title": "Static Bloom",
-        "desc": "A botanist on a ruined space station keeps the last flower on Earth alive while the AI above decides its fate.",
-        "duration": 134, "language": "English", "certification": "U/A",
-        "director": "Nadia Rahman", "status": "now_showing", "trending": False,
-        "release_offset": 26, "actors": ["Meera Kapoor", "Jon Bell"],
+        "title": "Cocktail 2",
+        "desc": "After a decade together, Diya and Kunal's relationship is shaken when Ally, an old friend, re-enters their lives. What begins as a plan between two women spirals into chaos, triggering a hilarious, emotional rollercoaster none of them saw coming.",
+        "duration": 150, "language": "Hindi", "certification": "U/A",
+        "director": "Homi Adajania", "status": "now_showing", "trending": True,
+        "release_offset": 40, "actors": ["Shahid Kapoor", "Kriti Sanon", "Rashmika Mandanna"],
+        "genres": ["Romance", "Comedy", "Drama"],
     },
     {
-        "title": "Crimson Quarry",
-        "desc": "An archaeologist and a small-town cop uncover a smuggling ring beneath a 400-year-old mine.",
-        "duration": 140, "language": "English", "certification": "A",
-        "director": "Marco Alvarez", "status": "now_showing", "trending": False,
-        "release_offset": 34, "actors": ["Daniel Cruz", "Zoya Sheikh"],
+        "title": "Ikkis",
+        "desc": "Biographical action drama about the real-life experiences of Second Lieutenant Arun Khetarpal during the India-Pakistan war of 1971.",
+        "duration": 144, "language": "Hindi", "certification": "U/A",
+        "director": "Sriram Raghavan", "status": "now_showing", "trending": False,
+        "release_offset": 50, "actors": ["Dharmendra", "Jaideep Ahlawat", "Agastya Nanda"],
+        "genres": ["Action", "Drama", "Biography"],
     },
     {
-        "title": "Biryani Diaries",
-        "desc": "A chaotic family cooks one enormous pot of biryani at a wedding while old grievances bubble to the surface.",
-        "duration": 105, "language": "Hindi", "certification": "U",
-        "director": "Farhan Qureshi", "status": "now_showing", "trending": False,
-        "release_offset": 41, "actors": ["Rohan Desai", "Ishaan Kulkarni"],
+        "title": "Main Vaapas Aaunga",
+        "desc": "A story of love, longing and belonging rooted in Partition-era migration. Examines memory, nostalgia, and emotional ties to home and loved ones, exploring how the past shapes identity and sustains the human spirit across generations.",
+        "duration": 167, "language": "Hindi", "certification": "U/A",
+        "director": "Imtiaz Ali", "status": "now_showing", "trending": False,
+        "release_offset": 60, "actors": ["Diljit Dosanjh", "Naseeruddin Shah", "Vedang Raina"],
+        "genres": ["Drama", "Romance"],
     },
     {
-        "title": "The Last Lighthouse",
-        "desc": "A lonely keeper and a mysterious visitor trade stories through one storm-filled night.",
-        "duration": 96, "language": "English", "certification": "U",
-        "director": "Elena Fischer", "status": "upcoming", "trending": False,
-        "release_offset": 21, "actors": ["Jon Bell"],
-    },
-    {
-        "title": "Monsoon Circuit",
-        "desc": "Two rival auto mechanics accidentally enter a cross-country race during the monsoon.",
-        "duration": 118, "language": "Hindi", "certification": "U/A",
-        "director": "Aditya Rao", "status": "upcoming", "trending": True,
-        "release_offset": 28, "actors": ["Zoya Sheikh", "Rohan Desai"],
-    },
-    {
-        "title": "Echo Chamber",
-        "desc": "A podcaster realises every guest she interviews has already heard her episodes before meeting her.",
-        "duration": 109, "language": "English", "certification": "U/A",
-        "director": "Tom Iverson", "status": "upcoming", "trending": False,
-        "release_offset": 35, "actors": ["Meera Kapoor", "Daniel Cruz"],
-    },
-    {
-        "title": "Rocket Rickshaw",
-        "desc": "A madcap animated adventure about a rickshaw that accidentally flies to the moon.",
-        "duration": 94, "language": "Hindi", "certification": "U",
-        "director": "Ananya Bose", "status": "upcoming", "trending": False,
-        "release_offset": 42, "actors": [],
+        "title": "Border 2",
+        "desc": "Young Indian fighters prepared to protect their homeland from a greater threat during the 1971 Indo-Pak war.",
+        "duration": 200, "language": "Hindi", "certification": "A",
+        "director": "Anurag Singh", "status": "now_showing", "trending": False,
+        "release_offset": 70, "actors": ["Sunny Deol", "Varun Dhawan", "Diljit Dosanjh"],
+        "genres": ["Action", "Drama"],
     },
 ]
 
@@ -222,7 +207,6 @@ class Command(BaseCommand):
                 actors[name] = actor
 
         self.stdout.write("Seeding movies...")
-        rng = random.Random(42)
         today = date.today()
         movie_objs = []
         for i, m in enumerate(MOVIES):
@@ -241,10 +225,8 @@ class Command(BaseCommand):
             )
             if created:
                 set_image_field(obj, "poster", make_poster(m["title"], tag=f"{m['language']} | {m['certification']}"))
-                obj.genres.set(rng.sample(genres, k=3))
+                obj.genres.set([g for g in genres if g.name in m.get("genres", [])])
                 obj.cast.set([actors[n] for n in m["actors"] if n in actors])
-                for _ in range(rng.randint(2, 5)):
-                    pass  # reviews seeded separately below
             movie_objs.append(obj)
             self.stdout.write(f"  - {m['title']}")
 
@@ -287,12 +269,13 @@ class Command(BaseCommand):
 
         self.stdout.write("Seeding showtimes...")
         show_movies = [m for m in movie_objs if m.status == Movie.Status.NOW_SHOWING]
+        start_times = [time(10, 30), time(13, 0), time(15, 30), time(18, 0), time(20, 30), time(23, 0)]
         for day in range(0, 4):
             show_date = today + timedelta(days=day)
             for cinema in cinema_objs:
                 for screen in cinema.screens.all():
-                    for idx, movie in enumerate(show_movies[:2]):
-                        start = time(11 + idx * 5, 30) if day % 2 == 0 else time(10 + idx * 6, 0)
+                    for idx, movie in enumerate(show_movies):
+                        start = start_times[idx % len(start_times)]
                         end = (timezone.datetime.combine(show_date, start) + timedelta(minutes=movie.duration)).time()
                         Showtime.objects.get_or_create(
                             screen=screen, show_date=show_date, start_time=start,
@@ -336,6 +319,6 @@ class Command(BaseCommand):
 
         for movie in movie_objs:
             if not Review.objects.filter(movie=movie).exists():
-                Review.objects.create(user=demo, movie=movie, rating=rng.randint(3, 5), comment="Great seats and smooth booking experience!")
+                Review.objects.create(user=demo, movie=movie, rating=5, comment="Great seats and smooth booking experience!")
 
         self.stdout.write(self.style.SUCCESS("Done. Demo user: demo / demo12345, admin: admin / admin12345"))

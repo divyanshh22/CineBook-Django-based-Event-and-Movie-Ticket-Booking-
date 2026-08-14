@@ -23,6 +23,18 @@ const EMPTY_FORM = {
   cast_ids: [],
 }
 
+function buildMovieFormData(data, file) {
+  const fd = new FormData()
+  Object.entries(data).forEach(([key, value]) => {
+    if (value === null || value === undefined || value === '') return
+    if (key === 'poster' || key === 'backdrop') return
+    if (Array.isArray(value)) value.forEach((v) => fd.append(key, v))
+    else fd.append(key, value)
+  })
+  if (file) fd.append('poster', file)
+  return fd
+}
+
 export default function Movies() {
   const [movies, setMovies] = useState([])
   const [genres, setGenres] = useState([])
@@ -31,6 +43,7 @@ export default function Movies() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [editing, setEditing] = useState(null)
+  const [posterFile, setPosterFile] = useState(null)
 
   const load = useCallback(() => {
     setLoading(true)
@@ -47,8 +60,12 @@ export default function Movies() {
 
   useEffect(load, [load])
 
-  const openCreate = () => setEditing({ ...EMPTY_FORM, id: null })
-  const openEdit = (movie) =>
+  const openCreate = () => {
+    setPosterFile(null)
+    setEditing({ ...EMPTY_FORM, id: null })
+  }
+  const openEdit = (movie) => {
+    setPosterFile(null)
     setEditing({
       ...movie,
       duration: movie.duration,
@@ -56,9 +73,11 @@ export default function Movies() {
       genre_ids: movie.genre_ids || [],
       cast_ids: movie.cast_ids || [],
     })
+  }
 
   const close = () => {
     setEditing(null)
+    setPosterFile(null)
     setError('')
   }
 
@@ -66,10 +85,11 @@ export default function Movies() {
     setSaving(true)
     setError('')
     try {
+      const payload = posterFile ? buildMovieFormData(editing, posterFile) : editing
       if (editing.id) {
-        await adminMovies.update(editing.id, editing)
+        await adminMovies.update(editing.id, payload)
       } else {
-        await adminMovies.create(editing)
+        await adminMovies.create(payload)
       }
       close()
       load()
@@ -194,6 +214,20 @@ export default function Movies() {
                 Trailer URL
                 <input value={editing.trailer_url || ''} onChange={(e) => setField('trailer_url', e.target.value)} placeholder="https://youtu.be/..." />
               </label>
+              <label className="form-field">
+                Poster image
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setPosterFile(e.target.files[0] || null)}
+                />
+              </label>
+              {posterFile && (
+                <div className="form-field form-field-wide">
+                  New poster preview
+                  <img src={URL.createObjectURL(posterFile)} alt="New poster preview" className="poster-upload-preview" />
+                </div>
+              )}
               <label className="form-field form-field-wide">
                 Description
                 <textarea rows="3" value={editing.description} onChange={(e) => setField('description', e.target.value)} />
