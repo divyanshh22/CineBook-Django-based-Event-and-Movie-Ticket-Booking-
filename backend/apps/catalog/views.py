@@ -49,6 +49,10 @@ class MovieViewSet(viewsets.ReadOnlyModelViewSet):
         ordering = self.request.query_params.get("ordering")
         if ordering == "popularity":
             qs = qs.order_by("-trending", "-avg_rating", "-release_date")
+        elif ordering in self.ordering_fields:
+            qs = qs.order_by(ordering)
+        else:
+            qs = qs.order_by("-release_date")
         return qs
 
     def get_serializer_class(self):
@@ -111,7 +115,7 @@ class ActorViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class EventCategoryViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = EventCategory.objects.annotate(event_count=Count("events", distinct=True))
+    queryset = EventCategory.objects.annotate(event_count=Count("events", distinct=True)).order_by("name")
     serializer_class = EventCategorySerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ["name"]
