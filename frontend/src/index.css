@@ -1410,10 +1410,12 @@ input, select, textarea {
 
 .badge-cancelled,
 .badge-ended,
-.badge-failed { background: var(--danger-soft); color: var(--danger); }
+.badge-failed,
+.badge-archived { background: var(--danger-soft); color: var(--danger); }
 
 .badge-pending,
-.badge-coming_soon { background: var(--warning-soft); color: var(--warning); }
+.badge-coming_soon,
+.badge-upcoming { background: var(--warning-soft); color: var(--warning); }
 
 .badge-completed { background: var(--surface-3); color: var(--text-muted); }
 

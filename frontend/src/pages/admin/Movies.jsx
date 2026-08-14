@@ -5,8 +5,8 @@ import { ErrorBanner, LoadingScreen } from '../../components/ui/Feedback'
 
 const STATUS_OPTIONS = [
   { value: 'now_showing', label: 'Now showing' },
-  { value: 'coming_soon', label: 'Coming soon' },
-  { value: 'ended', label: 'Ended' },
+  { value: 'upcoming', label: 'Coming soon' },
+  { value: 'archived', label: 'Ended' },
 ]
 
 const EMPTY_FORM = {
